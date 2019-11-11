@@ -2,44 +2,63 @@ const express = require('express');
 const app = express();
 const port = 3000;
 const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
 
+mongoose.connect('mongodb://localhost:27017/yelp_camp', { useNewUrlParser: true, useUnifiedTopology: true });
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set('view engine', 'ejs');
 
-var campgrounds = [
-	{
-		name: 'Big Snake Lake',
-		image: 'https://pixabay.com/get/57e2dd4a4351ac14f6da8c7dda793f7f1636dfe2564c704c722c78d69f4dc45b_340.jpg'
-	},
-	{
-		name: 'Spooky Skies',
-		image: 'https://pixabay.com/get/54e2dd444f55ad14f6da8c7dda793f7f1636dfe2564c704c722c78d69f4dc45b_340.jpg'
-	},
-	{
-		name: 'Wolf Bay',
-		image: 'https://pixabay.com/get/5fe8d143495ab108f5d084609620367d1c3ed9e04e50744e762c79dc974cc6_340.jpg'
-	},
-	{
-		name: 'Clements Campsite',
-		image: 'https://pixabay.com/get/57e0d6424954ac14f6da8c7dda793f7f1636dfe2564c704c722c78d69f4dc45b_340.jpg'
-	}
-];
+//SCHEMA
+const campgroundSchema = new mongoose.Schema({
+	name: String,
+	image: String
+});
+
+var Campground = mongoose.model('Campground', campgroundSchema);
+
+// Campground.create(
+// 	{
+// 		name: 'Spooky Skies',
+// 		image: 'https://inteng-storage.s3.amazonaws.com/img/iea/MRw4y5ABO1/sizes/camping-tech-trends_resize_md.jpg'
+// 	},
+// 	(err, campground) => {
+// 		if (err) {
+// 			console.log(err);
+// 		} else {
+// 			console.log('NEWLY CREATED CAMPGROUND: ');
+// 			console.log(campground);
+// 		}
+// 	}
+// );
 
 app.get('/', (req, res) => {
 	res.render('landing');
 });
 
 app.get('/campgrounds', (req, res) => {
-	res.render('campgrounds', { campgrounds: campgrounds });
+	// Get all campgrounds from DB
+	Campground.find({}, (err, allCampgrounds) => {
+		if (err) {
+			console.log(err);
+		} else {
+			res.render('campgrounds', { campgrounds: allCampgrounds });
+		}
+	});
 });
 
 app.post('/campgrounds', (req, res) => {
 	var name = req.body.name;
 	var image = req.body.image;
 	var newCampground = { name: name, image: image };
-	campgrounds.push(newCampground);
-	//redirect back to campgrounds page
-	res.redirect('/campgrounds');
+	//Create a new campground and save to DB
+	Campground.create(newCampground, (err, newlyCreated) => {
+		if (err) {
+			console.log(err);
+		} else {
+			//redirect back to campgrounds page
+			res.redirect('/campgrounds');
+		}
+	});
 });
 
 app.get('/campgrounds/new', (req, res) => {
