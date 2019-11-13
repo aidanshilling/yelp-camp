@@ -12,11 +12,14 @@
     </header>
 
     <div class="row justify-content-md-center" style="display: flex; flex-wrap: wrap;">
-        <% campgrounds.forEach((site) => { %> 
+        <% campgrounds.forEach((campground) => { %> 
             <div class="col-sm-auto">
-                <h5><%= site.name %></h5>
-                <div class="img-thumbnail">
-                    <img src="<%= site.image %>">
+                <div class="img-thumbnail text-center">
+                    <img src="<%= campground.image %>">
+                    <div class="caption"><h5><%= campground.name %></h5></div>
+                    <p>
+                        <a href="/campgrounds/<%= campground._id %>" class="btn btn-primary">More Info</a>
+                    </p>
                 </div>
             </div>
         <%})%>

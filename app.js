@@ -11,25 +11,11 @@ app.set('view engine', 'ejs');
 //SCHEMA
 const campgroundSchema = new mongoose.Schema({
 	name: String,
-	image: String
+	image: String,
+	description: String
 });
 
 var Campground = mongoose.model('Campground', campgroundSchema);
-
-// Campground.create(
-// 	{
-// 		name: 'Spooky Skies',
-// 		image: 'https://inteng-storage.s3.amazonaws.com/img/iea/MRw4y5ABO1/sizes/camping-tech-trends_resize_md.jpg'
-// 	},
-// 	(err, campground) => {
-// 		if (err) {
-// 			console.log(err);
-// 		} else {
-// 			console.log('NEWLY CREATED CAMPGROUND: ');
-// 			console.log(campground);
-// 		}
-// 	}
-// );
 
 app.get('/', (req, res) => {
 	res.render('landing');
@@ -41,7 +27,7 @@ app.get('/campgrounds', (req, res) => {
 		if (err) {
 			console.log(err);
 		} else {
-			res.render('campgrounds', { campgrounds: allCampgrounds });
+			res.render('index', { campgrounds: allCampgrounds });
 		}
 	});
 });
@@ -49,7 +35,8 @@ app.get('/campgrounds', (req, res) => {
 app.post('/campgrounds', (req, res) => {
 	var name = req.body.name;
 	var image = req.body.image;
-	var newCampground = { name: name, image: image };
+	var description = req.body.description;
+	var newCampground = { name: name, image: image, description: description };
 	//Create a new campground and save to DB
 	Campground.create(newCampground, (err, newlyCreated) => {
 		if (err) {
@@ -63,6 +50,17 @@ app.post('/campgrounds', (req, res) => {
 
 app.get('/campgrounds/new', (req, res) => {
 	res.render('new.ejs');
+});
+
+// SHOW - shows more info about one campground
+app.get('/campgrounds/:id', (req, res) => {
+	Campground.findById(req.params.id, (err, foundCampground) => {
+		if (err) {
+			console.log(err);
+		} else {
+			res.render('show', { campground: foundCampground });
+		}
+	});
 });
 
 app.listen(port, () => {
